@@ -5,6 +5,7 @@ import { useUser } from "../../contexts/UserContext";
 export default function SignupForm({ onSwitch }) {
   const { login: setUser } = useUser();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [role, setRole] = useState("attendee");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +18,7 @@ export default function SignupForm({ onSwitch }) {
     }
     setLoading(true);
     try {
-      const user = signup(form);
+      const user = signup({ ...form, role });
       setUser(user);
     } catch (err) {
       setError(err.message);
@@ -32,6 +33,23 @@ export default function SignupForm({ onSwitch }) {
       <p className="auth-sub">Find events happening around you</p>
 
       {error && <div className="auth-error">{error}</div>}
+
+      <div className="auth-role-toggle">
+        <button
+          type="button"
+          className={`auth-role-btn ${role === "attendee" ? "active" : ""}`}
+          onClick={() => setRole("attendee")}
+        >
+          🎟️ Attendee
+        </button>
+        <button
+          type="button"
+          className={`auth-role-btn ${role === "planner" ? "active" : ""}`}
+          onClick={() => setRole("planner")}
+        >
+          🎪 Event Planner
+        </button>
+      </div>
 
       <label>Name</label>
       <input

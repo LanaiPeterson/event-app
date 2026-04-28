@@ -1,45 +1,37 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useState, useCallback } from "react";
+import { useUser } from "./UserContext";
 
-// Initialize the context
-const SavedEventsContext = createContext();
+const SavedEventsContext = createContext(null);
+const key = (uid) => `events_saved_${uid}`;
 
-// Define initial state
-const initialState = {
-    savedEvents: [],
-};
+function load(uid) {
+  if (!uid) return [];
+  return JSON.parse(localStorage.getItem(key(uid)) || "[]");
+}
 
-// Define reducer function
-const reducer = (state, action) => {
-    switch (action.type) {
-        case 'ADD_EVENT':
-            return { ...state, savedEvents: [...state.savedEvents, action.payload] };
-        case 'REMOVE_EVENT':
-            return { ...state, savedEvents: state.savedEvents.filter(event => event.id !== action.payload.id) };
-        case 'CHECK_EVENT':
-            return state.savedEvents.some(event => event.id === action.payload.id);
-        default:
-            return state;
-    }
-};
+export function SavedEventsProvider({ children }) {
+  const { user } = useUser();
+  const [saved, setSaved] = useState(() => load(user?.id));
 
-// Provide context to children components
-const SavedEventsProvider = ({ children }) => {
-    const [state, dispatch] = useReducer(reducer, initialState);
+  const isSaved = useCallback((id) => saved.some((e) => e.id === id), [saved]);
 
-    const addEvent = (event) => { dispatch({ type: 'ADD_EVENT', payload: event }); };
-    const removeEvent = (event) => { dispatch({ type: 'REMOVE_EVENT', payload: event }); };
-    const checkEvent = (event) => { return dispatch({ type: 'CHECK_EVENT', payload: event }); };
+  function toggleSaved(event) {
+    setSaved((prev) => {
+      const next = prev.some((e) => e.id === event.id)
+        ? prev.filter((e) => e.id !== event.id)
+        : [...prev, event];
+      if (user) localStorage.setItem(key(user.id), JSON.stringify(next));
+      return next;
+    });
+  }
 
-    return (
-        <SavedEventsContext.Provider value={{ state, addEvent, removeEvent, checkEvent }}>
-            {children}
-        </SavedEventsContext.Provider>
-    );
-};
+  return (
+    <SavedEventsContext.Provider value={{ saved, isSaved, toggleSaved }}>
+      {children}
+    </SavedEventsContext.Provider>
+  );
+}
 
-// Custom hook for using saved events context
-const useSavedEvents = () => {
-    return useContext(SavedEventsContext);
-};
-
-export { SavedEventsProvider, useSavedEvents };
+export function useSaved() {
+  return useContext(SavedEventsContext);
+}

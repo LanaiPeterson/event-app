@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { geocodeQuery } from "../../api/geocode";
+import AddressAutocomplete from "../ui/AddressAutocomplete";
 
 export default function LocationSearch({ onLocation }) {
   const [query, setQuery] = useState("");
@@ -26,12 +27,12 @@ export default function LocationSearch({ onLocation }) {
     <form className="location-search" onSubmit={handleSubmit}>
       <div className="location-search__input-wrap">
         <span className="location-search__icon">📍</span>
-        <input
-          className="location-search__input"
-          type="text"
-          placeholder="Enter city or zip code..."
+        <AddressAutocomplete
           value={query}
-          onChange={(e) => { setQuery(e.target.value); setError(""); }}
+          onChange={(v) => { setQuery(v); setError(""); }}
+          placeholder="Enter city or zip code..."
+          className="location-search__input"
+          style={{ flex: 1, border: "none", background: "transparent", outline: "none", padding: "9px 4px", fontSize: 13, minWidth: 0 }}
         />
         <button
           className="location-search__btn"

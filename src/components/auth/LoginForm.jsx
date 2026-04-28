@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { login } from "../../api/auth";
 import { useUser } from "../../contexts/UserContext";
 
-export default function LoginForm({ onSwitch }) {
+export default function LoginForm({ onSwitch, onForgot }) {
   const { login: setUser } = useUser();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -51,12 +51,13 @@ export default function LoginForm({ onSwitch }) {
         {loading ? "Signing in..." : "Sign In"}
       </button>
 
-      <p className="auth-switch">
-        Don't have an account?{" "}
-        <button type="button" className="link-btn" onClick={onSwitch}>
-          Sign up
-        </button>
-      </p>
+      <div className="auth-switch" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span>
+          Don't have an account?{" "}
+          <button type="button" className="link-btn" onClick={onSwitch}>Sign up</button>
+        </span>
+        <button type="button" className="link-btn" onClick={onForgot}>Forgot password?</button>
+      </div>
     </form>
   );
 }

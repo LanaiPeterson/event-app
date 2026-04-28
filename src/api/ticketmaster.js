@@ -30,8 +30,10 @@ export async function fetchTicketmasterEvents({
 }) {
   if (!isConfigured()) return [];
 
-  const today = new Date().toISOString().split("T")[0];
-  const startDate = date || today;
+  // Use local date, not UTC — toISOString() can roll to "tomorrow" in US evening hours.
+  const now = new Date();
+  const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const startDate = date || localToday;
 
   const params = new URLSearchParams({
     apikey: TM_KEY,
@@ -94,6 +96,8 @@ export async function fetchTicketmasterEvents({
       ev.pleaseNote ||
       `${genre || segment} event at ${venue?.name ?? "a local venue"} in ${venue?.city?.name ?? "your area"}.`;
 
+    const priceRange = ev.priceRanges?.[0];
+
     return {
       id: `tm_${ev.id}`,
       title: ev.name,
@@ -107,6 +111,8 @@ export async function fetchTicketmasterEvents({
       image: bestImage,
       url: ev.url,
       source: "Ticketmaster",
+      priceMin: priceRange?.min ?? null,
+      priceMax: priceRange?.max ?? null,
     };
   });
 
